@@ -58,6 +58,13 @@ class CheckboxJsonApi
     /** @var Client $guzzleClient */
     private $guzzleClient;
 
+    /** @var array  */
+    private $defaultGuzzleOptions = [
+        'verify' => false,
+        'http_errors' => false,
+        'timeout' => 5
+    ];
+
     /** @var int $connectTimeout */
     private $connectTimeout;
 
@@ -78,22 +85,17 @@ class CheckboxJsonApi
      * Constructor
      *
      * @param Config $config
-     * @param int $connectTimeoutSeconds
+     * @param array $guzzleOptions
      *
      */
-    public function __construct(Config $config, int $connectTimeoutSeconds = 5)
+    public function __construct(Config $config, array $guzzleOptions = [])
     {
         $this->config = $config;
-        $this->connectTimeout = $connectTimeoutSeconds;
         $this->routes = new Routes($this->config->get(Config::API_URL));
 
-        $this->guzzleClient = new Client([
-            'verify' => false,
-            'http_errors' => false
-        ]);
+        $this->guzzleClient = new Client(array_merge($this->defaultGuzzleOptions, $guzzleOptions));
 
         $this->requestOptions = [
-            'connect_timeout' => $this->connectTimeout,
             'headers' => [
                 'Content-Type' => 'application/json',
                 'X-License-Key' => $this->config->get('licenseKey')
